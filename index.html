@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbe4e6">
+<title>Calculadora de Massa de Pão</title>
+<style>
+  :root {
+    --cream: #fff8ef;
+    --cream-deep: #fdeedd;
+    --rose: #f4b8c1;
+    --rose-soft: #fbe4e6;
+    --rose-deep: #c9707f;
+    --peach: #fcd9b8;
+    --butter: #fbeac0;
+    --cocoa: #6b4a42;
+    --cocoa-soft: #a07f76;
+    --card: #fffdf9;
+    --shadow: 0 10px 30px rgba(201, 112, 127, .18);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body { margin: 0; min-height: 100%; }
+
+  body {
+    font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--cocoa);
+    background:
+      radial-gradient(circle at 12% 8%, var(--rose-soft) 0 18%, transparent 19%),
+      radial-gradient(circle at 92% 22%, var(--butter) 0 14%, transparent 15%),
+      radial-gradient(circle at 8% 78%, var(--peach) 0 12%, transparent 13%),
+      radial-gradient(circle at 95% 92%, var(--rose-soft) 0 16%, transparent 17%),
+      var(--cream);
+    background-attachment: fixed;
+    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+             max(28px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    display: flex;
+    justify-content: center;
+  }
+
+  .app { width: 100%; max-width: 440px; }
+
+  header { text-align: center; padding: 10px 0 18px; }
+  .emoji { font-size: 44px; line-height: 1; display: block; margin-bottom: 6px; }
+  h1 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 28px;
+    letter-spacing: .3px;
+    color: var(--rose-deep);
+  }
+  .sub { margin: 6px 0 0; font-size: 14px; color: var(--cocoa-soft); }
+
+  .card {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 2px dashed var(--rose);
+  }
+
+  .flour {
+    background: linear-gradient(135deg, var(--butter), var(--peach));
+    border-radius: 22px;
+    padding: 16px 18px 18px;
+    margin-bottom: 16px;
+  }
+  .flour label { font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; }
+  .flour label span { font-weight: 600; color: var(--cocoa-soft); }
+  .flour .field { margin-top: 8px; }
+
+  .field { display: flex; align-items: baseline; gap: 8px; }
+  .big {
+    flex: 1; min-width: 0;
+    font: inherit; font-size: 34px; font-weight: 700; color: var(--cocoa);
+    background: rgba(255,255,255,.75);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    padding: 8px 14px;
+    outline: none;
+  }
+  .big:focus { border-color: var(--rose-deep); background: #fff; }
+  .unit { font-size: 20px; font-weight: 700; color: var(--cocoa-soft); }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 14px 4px;
+    border-top: 2px dotted var(--rose);
+  }
+  .row:first-of-type { border-top: 0; }
+  .name { font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .name i { font-style: normal; font-size: 22px; }
+
+  .result { text-align: right; font-size: 26px; font-weight: 800; color: var(--rose-deep); font-variant-numeric: tabular-nums; }
+  .result small { font-size: 15px; font-weight: 700; color: var(--cocoa-soft); margin-left: 2px; }
+
+  .pct { display: flex; align-items: center; gap: 6px; }
+  .pct input {
+    width: 92px;
+    font: inherit; font-size: 17px; font-weight: 700; color: var(--cocoa);
+    text-align: right;
+    background: var(--rose-soft);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 7px 10px;
+    outline: none;
+  }
+  .pct input:focus { border-color: var(--rose-deep); background: #fff; }
+  .pct span { font-weight: 700; color: var(--cocoa-soft); }
+
+  .total {
+    margin-top: 12px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-soft));
+    border-radius: 22px;
+    padding: 16px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .total .t { font-weight: 800; font-size: 16px; }
+  .total .t small { display: block; font-weight: 600; font-size: 12px; color: var(--cocoa); opacity: .7; }
+  .total .v { font-size: 34px; font-weight: 800; color: var(--cocoa); font-variant-numeric: tabular-nums; }
+  .total .v small { font-size: 18px; }
+
+  .aviso { text-align: center; margin: 14px 0 0; padding: 10px 14px; border-radius: 16px; background: var(--butter); color: var(--cocoa); font-size: 13px; font-weight: 600; }
+
+  footer { text-align: center; margin-top: 16px; font-size: 12px; color: var(--cocoa-soft); }
+
+  /* ---------- Animações ---------- */
+  .app { position: relative; z-index: 1; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(22px) scale(.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  header, .flour, .row, .total, footer {
+    opacity: 0;
+    animation: rise .7s cubic-bezier(.2, .9, .3, 1.15) forwards;
+  }
+  header      { animation-delay: .05s; }
+  .flour      { animation-delay: .2s; }
+  .row:nth-of-type(2) { animation-delay: .32s; }
+  .row:nth-of-type(3) { animation-delay: .42s; }
+  .row:nth-of-type(4) { animation-delay: .52s; }
+  .total      { animation-delay: .65s; }
+  footer      { animation-delay: .8s; }
+  .card { animation: rise .8s cubic-bezier(.2, .9, .3, 1.1) both; }
+
+  @keyframes wobble {
+    0%, 100% { transform: rotate(-6deg) translateY(0); }
+    50%      { transform: rotate(6deg) translateY(-6px); }
+  }
+  .emoji { display: inline-block; animation: wobble 3.2s ease-in-out infinite; transform-origin: 50% 80%; }
+
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); color: var(--cocoa); }
+    100% { transform: scale(1); }
+  }
+  .result span, .total .v span { display: inline-block; transform-origin: 90% 60%; }
+  .pop { animation: pop .35s ease-out; }
+
+  .name i { display: inline-block; transition: transform .3s; }
+  .row:hover .name i, .row:focus-within .name i { transform: rotate(-12deg) scale(1.2); }
+
+  .big, .pct input { transition: border-color .2s, background .2s, transform .2s, box-shadow .2s; }
+  .big:focus, .pct input:focus { transform: scale(1.02); box-shadow: 0 6px 16px rgba(201, 112, 127, .25); }
+
+  @keyframes shine {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .total {
+    background: linear-gradient(110deg, var(--rose), var(--rose-soft), var(--peach), var(--rose-soft), var(--rose));
+    background-size: 200% 100%;
+    animation: rise .7s cubic-bezier(.2, .9, .3, 1.15) .65s forwards, shine 8s linear infinite;
+  }
+
+  .bubbles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .bubbles b {
+    position: absolute; bottom: -30px; border-radius: 50%;
+    background: rgba(255, 255, 255, .7);
+    box-shadow: 0 0 0 2px rgba(244, 184, 193, .35) inset;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    from { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 1; }
+    to   { transform: translateY(-110vh) translateX(24px); opacity: 0; }
+  }
+  .bubbles b:nth-child(1) { left: 8%;  width: 14px; height: 14px; animation-duration: 13s; }
+  .bubbles b:nth-child(2) { left: 22%; width: 22px; height: 22px; animation-duration: 18s; animation-delay: 3s; }
+  .bubbles b:nth-child(3) { left: 40%; width: 10px; height: 10px; animation-duration: 12s; animation-delay: 6s; }
+  .bubbles b:nth-child(4) { left: 58%; width: 18px; height: 18px; animation-duration: 16s; animation-delay: 1s; }
+  .bubbles b:nth-child(5) { left: 74%; width: 12px; height: 12px; animation-duration: 14s; animation-delay: 8s; }
+  .bubbles b:nth-child(6) { left: 90%; width: 20px; height: 20px; animation-duration: 19s; animation-delay: 4s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    header, .flour, .row, .total, footer, .card { opacity: 1 !important; }
+    .bubbles { display: none; }
+  }
+
+  @media (max-width: 360px) {
+    h1 { font-size: 24px; }
+    .big { font-size: 28px; }
+    .result { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="bubbles" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b></div>
+<main class="app">
+  <header>
+    <span class="emoji">🥖</span>
+    <h1>Massa de Pão</h1>
+    <p class="sub">Digite a farinha e o resto sai sozinho</p>
+  </header>
+
+  <section class="card">
+    <div class="flour">
+      <label for="farinha">🌾 Farinha <span>100%</span></label>
+      <div class="field">
+        <input id="farinha" class="big" type="text" inputmode="decimal" autocomplete="off" placeholder="0" value="500">
+        <span class="unit">g</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="name"><i>💧</i> Água</div>
+      <div class="pct"><input id="p-agua" type="text" inputmode="decimal" autocomplete="off" value="64"><span>%</span></div>
+      <div class="result" style="grid-column: 1 / -1"><span id="r-agua">320</span><small>ml</small></div>
+    </div>
+
+    <div class="row">
+      <div class="name"><i>🫧</i> Fermento</div>
+      <div class="pct"><input id="p-fermento" type="text" inputmode="decimal" autocomplete="off" value="35"><span>%</span></div>
+      <div class="result" style="grid-column: 1 / -1"><span id="r-fermento">175</span><small>g</small></div>
+    </div>
+
+    <div class="row">
+      <div class="name"><i>🧂</i> Sal</div>
+      <div class="pct"><input id="p-sal" type="text" inputmode="decimal" autocomplete="off" value="2,4"><span>%</span></div>
+      <div class="result" style="grid-column: 1 / -1"><span id="r-sal">12</span><small>g</small></div>
+    </div>
+
+    <div class="total">
+      <div class="t">Peso total<small>da massa</small></div>
+      <div class="v"><span id="total">1.007</span> <small>g</small></div>
+    </div>
+  </section>
+
+  <noscript><p class="aviso">Para calcular, abra este arquivo no Safari ou no Chrome (a pré-visualização do WhatsApp/Arquivos não faz as contas).</p></noscript>
+  <footer>Farinha 100% · água ml = g</footer>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  // Aceita "2,4" ou "2.4"; devolve NaN se vazio/inválido.
+  function num(str) {
+    var s = String(str).trim().replace(",", ".");
+    if (s === "" || !/^\d*\.?\d*$/.test(s)) return NaN;
+    return parseFloat(s);
+  }
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString("pt-BR");
+  }
+
+  var reduzMovimento = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Mostra o valor contando do número atual até o novo, com um "pop".
+  function mostrar(el, texto, valor) {
+    if (el._alvo === texto) return;
+    var de = typeof el._valor === "number" ? el._valor : null;
+    el._alvo = texto;
+    el._valor = valor;
+    cancelAnimationFrame(el._raf);
+    if (valor === null || de === null || reduzMovimento) { el.textContent = texto; return; }
+
+    el.classList.remove("pop");
+    void el.offsetWidth;
+    el.classList.add("pop");
+
+    var inicio = performance.now(), dur = 380;
+    (function passo(agora) {
+      var t = Math.min(1, (agora - inicio) / dur);
+      var suave = 1 - Math.pow(1 - t, 3);
+      el.textContent = fmt(de + (valor - de) * suave);
+      if (t < 1) el._raf = requestAnimationFrame(passo);
+      else el.textContent = texto;
+    })(inicio);
+  }
+
+  function calc() {
+    var farinha = num($("farinha").value);
+    var itens = [
+      ["agua", "p-agua"],
+      ["fermento", "p-fermento"],
+      ["sal", "p-sal"]
+    ];
+    var total = Math.round(farinha), ok = !isNaN(farinha);
+
+    itens.forEach(function (it) {
+      var pct = num($(it[1]).value);
+      var el = $("r-" + it[0]);
+      if (isNaN(farinha) || isNaN(pct)) {
+        mostrar(el, "—", null);
+        ok = false;
+      } else {
+        var peso = Math.round(farinha * pct / 100);
+        mostrar(el, fmt(peso), peso);
+        total += peso;
+      }
+    });
+
+    if (ok) mostrar($("total"), fmt(total), total);
+    else mostrar($("total"), "—", null);
+  }
+
+  ["farinha", "p-agua", "p-fermento", "p-sal"].forEach(function (id) {
+    $(id).addEventListener("input", calc);
+    $(id).addEventListener("focus", function () { this.select(); });
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>
